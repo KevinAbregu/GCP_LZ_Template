@@ -1,0 +1,23 @@
+##################### Restrict Cloud NAT Usage  #####################
+compute.restrictCloudNATUsage:
+  rules:
+  - allow:
+      all: true  
+
+##################### Restrict VPC Peering Usage  #####################
+compute.restrictVpcPeering:
+  rules:
+  - allow:
+      all: true  
+
+##################### Restrict Shared VPC Host Projects  #####################
+compute.restrictSharedVpcHostProjects:
+  rules:
+  - allow:
+      all: true  
+
+########## Allow Dedicated Interconnect Usage ##########
+compute.restrictDedicatedInterconnectUsage:
+  rules:
+  - allow:
+      all: true

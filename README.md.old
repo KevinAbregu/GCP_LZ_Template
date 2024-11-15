@@ -1,0 +1,486 @@
+# TODO - Landing Zone
+
+
+
+## Overview
+
+This code is designed to deploy a complete landing zone with different elements.
+
+It is divided in different stages.
+- 00-bootstrap: Initial setup with gcloud commands. It will provide a project with a service account with permissions to deploy on the organization/folder and a bucket where Terraform's states are stored.
+- 01-resource-mgmt:  Initial infrastructure is deployed with Terraform. It deploys Folders, Projects, Organization Policies, Deny Policies, Buckets, Service Accounts and IAM Permissions.
+- 02-networking: Networking resources are deployed with Terraform. It deploys VPCs, Subnets, Firewall, Addresses, NAT and HA-VPN.
+- 03-project: In this stage, every service project is going to deploy its different resources that are needed.
+
+This code uses [cloud-foundation-fabric's](https://github.com/GoogleCloudPlatform/cloud-foundation-fabric/tree/master/modules) modules with version V27.0.0 (01/11/2023) (it has been downloaded to make some internal changes)
+
+To clone the code:
+```
+cd existing_repo
+git remote add origin https://gitlab.intelligencepartner.com/saverglass/landing-zone.git
+git branch -M master
+git push -uf origin master
+```
+
+## How to deploy
+
+### 00-Bootstrap
+This step is deployed with an script that uses gcloud commands.
+
+#### Prerrequisites
+- Google Cloud CLI installed. Steps to install are [here](https://cloud.google.com/sdk/docs/install)
+- Permissions on organization/folder:
+    - Project Creator: roles/resourcemanager.projectCreator
+    - Folder Creator: roles/resourcemanager.folderCreator
+    - Organization Administrator: roles/resourcemanager.organizationAdmin
+    - Billing Account User: roles/billing.user
+
+#### Configuration
+Inside script-bootstrap there are different variables that you must configure first.
+- [PROJECT-ID]: Bootstrap Project ID, where service account to use in terraform is going to be hosted and where a bucket for storing Terraform states is going to be located.
+- [FOLDER-ID] or [[ORG-ID]]: Depending on who is the parent of the bootstrap project. If its at organization level or at folder level.
+- [BILLING-ACCOUNT]: Billing Account with XXXXXX-XXXXXX-XXXXXX format where billing of bootstrap project is counted.
+- [SA-NAME]: Service Account Name
+- [USER]: User that will execute Terraform's code.
+- [BKT-NAME]: Bucket name
+
+#### Description
+Steps followed by script:
+- [1] Creates a bootstrap project.
+- [2] Activates APIs inside bootstrap project.
+    - serviceusage.googleapis.com
+    - logging.googleapis.com
+    - bigquery.googleapis.com
+    - cloudresourcemanager.googleapis.com
+    - cloudbilling.googleapis.com
+    - iam.googleapis.com
+    - admin.googleapis.com
+    - appengine.googleapis.com
+    - storage-api.googleapis.com
+    - monitoring.googleapis.com
+    - orgpolicy.googleapis.com
+- [3] Creates a service account inside bootstrap project.
+- [4] Grants Organization/Folder permissions for the service account created on step 3.
+- [5] Grants Owner permissions on Bootstrap project for the service account created on step 3.
+- [6] Grants a User the role of Service Account Token Creator on the service account created on step 3. (Optional: Add a group instead of a user)
+- [7] Create a bucket with versioning activated inside bootstrap project, where Terraform's states are going to be stored.
+
+Once every step is accomplished, we have everything ready to start deploying infrastructure using terraform with impersonate activated.
+If a new user needs permissions to execute the Terraform's code, it only needs to have permissions (Service Account Token Creator) on the service account created on step 3.
+
+### 01-Resource-mgmt
+This stage is deployed with Terraform.
+It deploys Folders, Projects, Organization Policies, Deny Policies, Buckets, Service Accounts and IAM Permissions.
+#### Prerrequisites
+- [1] Stage [00-bootstrap](#00-bootstrap) must be finished.
+#### Configuration
+Only one file must be configured by user variables.auto.tfvars
+An example of use is provided on the file variables.auto.tfvars.sample.
+
+Steps to follow:
+- [0] Provider must be filled with the data used in stage 0. (Service account + bucket)
+- [1] There are some required variables to configure:
+    - [1] organization_id = "organizations/[ORG-ID]"
+    - [2] parent_root = "organizations/[ORG-ID]" OR "folders/[FOLDER-ROOT-ID]" This depends if the landing is deployed behind an entire organization or behind a folder.
+    - [3] billing_account  = "[BILLING-ACCOUNT]"
+
+- [2] First resources to configure are folders, with the variable "folders". To follow a proper structure, root folders must be created first, level folders are created before, and level 3 folders are created at last.
+    - Root folders are created behind the key "level1", 
+    - Second level folders are created behind the key "level2",
+    - Third level folders are created behind the key "level3",
+-  If its neccesary more deep levels of folders, its necessary to make some small changes on the code (copy + paste level3 configuration and changing to level 4) 
+Its configuration is:
+
+    ```
+    variable "folders" {
+    type = map(list(object(
+        {
+        name                   = string
+        parent                 = optional(string, null) 
+        org_policies_data_path = optional(string, null)
+        denied_policies = optional(list(object({
+            name = string 
+            denied_principals = optional(list(string), null)  
+            denied_exceptions = optional(list(string), null) 
+            denied_apis       = list(string)
+        })), [])
+        }))
+    )
+    description = "Folders configuration: Key (level1, level2, level3) identifies the creation order"
+    default     = {}
+    }
+    ```  
+
+    - [2.1] name: ID and display name of the folder.
+    - [2.2] parent: Required for non-root folders, it contains the folder name of its parent.
+    - [2.3] org_policies_data_path: Optional. If specified, it contains a relative path where yaml files are configured with organization policies. The relative path is behind landing-zone/01-resource-mgmt/org-policies-config/folders. A yaml file example is delivered on /folder-01-example/
+    - [2.3] denied_policies: Optional. If specified, denied policies are going to be applied. It's possible to apply different denied policies on a single folder, adding another member to the list.
+        - [2.3.1] name: Name of the deny policy.
+        - [2.3.2] denied_principals: Optional. Indicates which principals are going to be denied with format: 
+            - (default value) For all Users: principalSet://goog/public:all
+            - Group: principalSet://goog/group/GROUP_EMAIL_ADDRESS
+            - An Individual User: principal://goog/subject/USER_EMAIL_ADDRESS
+            - Service Account: principal://iam.googleapis.com/projects/-/serviceAccounts/SA_EMAIL_ADDRESS
+        - [2.3.3] denied_exceptions: Optional. Indicates which principals are an exception of the deny policy. Same format as denied_principals, default value is none.
+        - [2.3.4] Required. Apis affected by this policy
+
+An example is shown:
+
+```
+folders = {
+  level1 = [
+    {
+      name = "folder-test-kev-01"
+    },{
+      name = "folder-test-kev-02"
+      org_policies_data_path = "folder-01-example"
+      denied_policies = [{ 
+        name = "policy-01"
+        denied_apis       = ["compute.googleapis.com/routers.list"]
+        denied_exceptions = ["principal://goog/subject/kabregu@dev.intelligencepartner.com", "principal://goog/subject/marouene.djabbar@dev.intelligencepartner.com"]
+      }]
+    }
+  ],
+  level2 = [
+    {
+      name = "folder-kev-lvl2-01"
+      parent = "folder-test-kev-01"
+    }
+  ]
+  level3 = [
+    {
+      name = "folder-level-lvl3-01"
+      parent = "folder-kev-lvl2-01"
+    },
+    {
+      name = "folder-kev-lvl3-02"
+      parent = "folder-kev-lvl2-01"
+    }
+  ]
+}
+```
+
+In the example above, 2 folders are created at root level:
+- folder-test-kev-01
+- folder-test-kev-02: 
+    - Organization policies on yamls files on path landing-zone/01-resource-mgmt/org-policies-config/folders/folder-01-example/  are applied.
+    - A deny policies for routers.list is created.
+
+One level 2 folder is created behind folder-test-kev-01
+- folder-kev-lvl2-01
+
+Two level 3 folders are created behind folder-kev-lvl2-01
+- folder-level-lvl3-01
+- folder-level-lvl3-02
+
+- [3] Next resources to configure are projects, with the variable "projects". 
+Its configuration is:
+    ```
+    variable "projects" {
+        type = list(object(
+        {
+            name                   = string, 
+            parent                 = string,
+            services               = optional(list(string), []),
+            prefix                 = optional(string, null),
+            svpc_host              = optional(bool, false),
+            svpc_service-host      = optional(string, null),
+            org_policies_data_path = optional(string, null) 
+            default_service_account = optional(string, "disable") 
+            denied_policies = optional(list(object({ 
+                name = string
+                denied_principals = optional(list(string), null)
+                denied_exceptions = optional(list(string), null) 
+                denied_apis       = list(string)
+            })), [])
+            labels = optional(map(string, {}))
+            })
+        )
+        description = "(optional) Projects configuration"
+        default     = []
+    }
+    ```
+
+    - [3.1] name: ID and display name of the project.
+    - [3.2] parent: Parent Folder name.
+    - [3.3] services: Optional. Apis to be activated.
+    - [3.4] prefix: Optional. Prefix added to the name.
+    - [3.5] svpc_host: Optional. If true, this project is a host project of a Shared VPC.
+    - [3.6] svpc_service: Optional. If this project is a service project of a Shared VPC, you must indicate the project's name of its host project in this variable.
+    - [3.7] org_policies_data_path: Optional. If specified, it contains a relative path where yaml files are configured with organization policies. The relative path is behind landing-zone/01-resource-mgmt/org-policies-config/projects. A yaml file example is delivered on /project-01-example/
+    - [3.8] default_service_account: Optional. Indicates the initial state of the default service account. If null this service account will be created disabled.
+    - [3.9] denied_policies: Optional. If specified, denied policies are going to be applied. It's possible to apply different denied policies on a single project, adding another member to the list.
+        - [3.9.1] name: Name of the deny policy.
+        - [3.9.2] denied_principals: Optional. Indicates which principals are going to be denied with format: 
+            - (default value) For all Users: principalSet://goog/public:all
+            - Group: principalSet://goog/group/GROUP_EMAIL_ADDRESS
+            - An Individual User: principal://goog/subject/USER_EMAIL_ADDRESS
+            - Service Account: principal://iam.googleapis.com/projects/-/serviceAccounts/SA_EMAIL_ADDRESS
+        - [3.9.3] denied_exceptions: Optional. Indicates which principals are an exception of the deny policy. Same format as denied_principals, default value is none.
+        - [3.9.4] denied_apis: Required. Apis affected by this policy
+    - [3.10] labels: Optional. By default labels of project + resource type are added.
+
+An example is shown:
+```
+projects = [{
+    name = "g-prj-kev-test-d-01"
+    parent = "folder-test-kev-01"
+    services = ["container.googleapis.com","stackdriver.googleapis.com"]
+    denied_policies = [
+        {
+            name = "policy-01"
+            denied_apis = ["compute.googleapis.com/routers.list"]
+            denied_exceptions = ["principal://goog/subject/kabregu@dev.intelligencepartner.com", "principal://goog/subject/marouene.djabbar@dev.intelligencepartner.com"]
+        },
+        {
+            name = "policy-02"
+            denied_apis = ["compute.googleapis.com/routers.create"]
+            denied_exceptions = ["principal://goog/subject/kabregu@dev.intelligencepartner.com"]
+        }
+    ]
+    org_policies_data_path = "project-01-example"
+    svpc_host = true
+  },
+  {
+    name = "g-prj-kev-test-d-02"
+    parent = "folder-test-kev-01"
+    services = ["container.googleapis.com", "stackdriver.googleapis.com"]
+    svpc_service-host = "g-prj-kev-test-d-01"
+  }
+]
+```
+In the example above, 2 projects are created behind folder-test-kev-01 folder:
+- g-prj-kev-test-d-01: 
+    - APIs are activated. 
+    - 2 different deny policies for routers.list and routers.create are created.
+    - Organization policies on yamls files on path landing-zone/01-resource-mgmt/org-policies-config/projects/project-01-example/  are applied.
+    - This project is activated as a host project of a Shared VPC.
+- g-prj-kev-test-d-02:
+    - APIs are activated.
+    - This project is activated as a service project being its host project g-prj-kev-test-d-01
+
+
+- [4] Next resources to configure are organization policies and deny policies at organization level, for this purpose we have two different variables.
+
+    ```
+    variable "organization_policies" {
+        type        = bool
+        default     = false
+        description = "(optional) Organization policies must be activated at org level. Its configuration is org-policies-config/organization/*.yaml"
+    }
+
+    variable "organization_denied_policies" {
+        type = list(object({
+            name = string 
+            denied_principals = optional(list(string), null)
+            denied_exceptions = optional(list(string), null) 
+            denied_apis       = list(string) 
+    }))
+        description = "(optional) Indicates which deny policies are going to be applied at organization level"
+        default = []
+    }
+    ```
+    - [4.1] organization_policies: Optional. If true, the organization policies configured on path landing-zone/01-resource-mgmt/org-policies-config/organization are applied. A yaml file example is delivered.
+    - [4.2] organization_denied_policies: Optional. If specified, denied policies are going to be applied. It's possible to apply different denied policies at organization level, adding another member to the list.
+        - [4.2.1] name: Name of the deny policy.
+        - [4.2.2] denied_principals: Optional. Indicates which principals are going to be denied with format: 
+            - (default value) For all Users: principalSet://goog/public:all
+            - Group: principalSet://goog/group/GROUP_EMAIL_ADDRESS
+            - An Individual User: principal://goog/subject/USER_EMAIL_ADDRESS
+            - Service Account: principal://iam.googleapis.com/projects/-/serviceAccounts/SA_EMAIL_ADDRESS
+        - [4.2.3] denied_exceptions: Optional. Indicates which principals are an exception of the deny policy. Same format as denied_principals, default value is none.
+        - [4.2.4] Required. Apis affected by this policy
+
+An example is shown:
+```
+organization_policies = true
+organization_denied_policies = [
+  {
+    name = "policy-01"
+    denied_apis       = ["compute.googleapis.com/routers.list"]
+    denied_exceptions = ["principal://goog/subject/kabregu@dev.intelligencepartner.com", "principal://goog/subject/marouene.djabbar@dev.intelligencepartner.com"]
+  },
+  {
+    name = "policy-02"
+    denied_apis       = ["compute.googleapis.com/routers.create"]
+    denied_exceptions = ["principal://goog/subject/kabregu@dev.intelligencepartner.com"]
+  }
+]
+```
+
+In the example above:
+- 2 different deny policies for routers.list and routers.create are created.
+- Organization policies configured on yamls files on path landing-zone/01-resource-mgmt/org-policies-config/organization/ are applied.
+
+- [5] Next resources to configure are buckets, with the variable buckets:
+Its configuration is:
+    ```
+    variable "buckets" {
+        type = list(object(
+            { 
+            name                   = string,
+            parent                 = string,
+            location               = optional(string, "EUROPE-WEST1")
+            storage_class          = optional(string, "STANDARD")
+            versioning             = optional(bool, false)
+            labels                 = optional(map(string), {})
+            lifecycle_rules        = optional(map(object({ 
+                action = object({ 
+                    type          = string
+                    storage_class = optional(string)
+                })
+                condition = object({ 
+                    age                        = optional(number)
+                    created_before             = optional(string)
+                    custom_time_before         = optional(string)
+                    days_since_custom_time     = optional(number)
+                    days_since_noncurrent_time = optional(number)
+                    matches_prefix             = optional(list(string))
+                    matches_storage_class      = optional(list(string))
+                    matches_suffix             = optional(list(string))
+                    noncurrent_time_before     = optional(string)
+                    num_newer_versions         = optional(number)
+                    with_state                 = optional(string)
+                })
+            })), {})
+            }))
+        description = "(optional) Buckets Configuration"
+        default     = []
+    }
+    ```
+    - [5.1] name: Bucket name
+    - [5.2] parent: Project name where bucket is created.
+    - [5.3] location: Bucket location (default value is EUROPE-WEST1)
+    - [5.4] storage_class: Bucket Storage Class (default value is STANDARD)
+    - [5.5] versioning: If true, versioning is activated on bucket.
+    - [5.6] labels: Optional. By default labels of project + resource type are added.
+    - [5.7] lifecycle_rules: Lifecycle rules to apply on the bucket.
+An example is shown:
+```
+buckets = [
+  {
+    name = "g-bkt-test-01"
+    parent = "g-prj-kev-test-d-01"
+    labels = {"saludo":"hola"},
+    lifecycle_rules = {
+        lr-0 = {
+          action = {
+            type          = "SetStorageClass"
+            storage_class = "STANDARD"
+          }
+          condition = {
+            age = 30
+          }
+        }
+      }
+  }
+]
+```
+In the example above:
+- Bucket "g-bkt-test-01" is created:
+    - Project where it is created is g-prj-kev-test-d-01
+    - A label is added to the bucket.
+    - A lifecycle rule to change to STANDARD class when 30 days pass.
+    - By default, location is europe-west1.
+    - By default, Storage class is standard.
+    - By default, versioning is not enabled.
+
+- [6] Last resources to configure are Service Account, with the variable service_accounts:
+Its configuration is:
+    ```
+    variable "service_accounts" {
+        type = list(object({
+            name = string
+            parent = string,
+            description = optional(string, "Managed by Terraform"), 
+            iam_project_roles = optional(map(list(string)), {}) 
+            iam_storage_roles = optional(map(list(string)), {}) 
+            iam_sa_roles = optional(map(list(string)), {})
+            iam_folder_roles = optional(map(list(string)), {})
+            iam_organization_roles = optional(list(string), [])
+            iam_bindings = optional(map(object({
+                members = list(string)
+                role    = string
+                condition = optional(object({
+                    expression  = string
+                    title       = string
+                    description = optional(string)
+                }))
+            })), {})
+        }))
+        default     = []
+        description = "(optional) Service Account Configuration"
+    }
+    ```
+    - [6.1] name: Service Account name
+    - [6.2] parent: Project name where Service Account is created.
+    - [6.3] description: Service Account description.
+    - [6.4] iam_project_roles: Optional. IAM Project Roles for SA. Format {"PROJECT" => [ROLES_LIST]}
+    - [6.5] iam_storage_roles: Optional. IAM Storage Roles for SA. Format {"BUCKET" => [ROLES_LIST]}
+    - [6.6] iam_sa_roles: Optional. IAM SA Roles for SA. Format {"SA" => [ROLES_LIST]}
+    - [6.7] iam_folder_roles: Optional. IAM Folder Roles for SA. Format {"FOLDER" => [ROLES_LIST]}
+    - [6.8] iam_organization_roles: Optional. IAM Organization Roles for SA. Format {"ORGANIZATION" => [ROLES_LIST]}
+    - [6.9] iam_bindings: Optional. IAM Roles on SA for other members. Format {"ROL" => {role = "ROL_ID", members = [LIST_MEMBERS]}}
+An example is shown:
+```
+service_accounts = [{
+  name = "service-account-kev"
+  parent = "g-prj-kev-test-d-01"
+  iam_project_roles = {
+    "g-prj-kev-test-d-01" = ["roles/logging.logWriter","roles/monitoring.metricWriter"],
+    "g-prj-kev-test-d-02" = ["roles/logging.logWriter"]
+  }
+  iam_bindings = {
+    "roles/iam.serviceAccountUser" = {
+      role = "roles/iam.serviceAccountUser"
+      members = ["user:kabregu@dev.intelligencepartner.com"]
+    }
+  }
+  iam_storage_roles = {
+    "g-bkt-test-01" = ["roles/storage.objectCreator"]
+  }
+  iam_folder_roles = {
+    "folder-test-kev-01" = ["roles/logging.logWriter"],
+  }
+  iam_organization_roles = ["roles/logging.logWriter"]
+}]
+```
+In the example above:
+- Service account "service-account-kev" is created:
+    - Project where it is created is g-prj-kev-test-d-01
+    - SA is granted with roles on project "g-prj-kev-test-d-01" ("roles/logging.logWriter","roles/monitoring.metricWriter")
+    - SA is granted with roles on project "g-prj-kev-test-d-02" ("roles/logging.logWriter")
+    - Member "user:kabregu@dev.intelligencepartner.com" will be granted with the role "roles/iam.serviceAccountUser" on this service account.
+    - SA is granted with roles on bucket "g-bkt-test-01" ("roles/storage.objectCreator")
+    - SA is granted with roles on folder "folder-test-kev-01" ("roles/logging.logWriter")
+    - SA is granted with roles on organization ("roles/logging.logWriter")
+
+#### Output
+The execution of this stage generates an output file with json format on the folder of the next stage, this output file contains information about ids of folders + projects created to be used in the next stage.
+The output file generated is called "output-rs-mgmt.auto.tfvars.json"
+
+An example of output is:
+```
+{
+   "folders_id":{
+      "folder-test-kev-01":"folders/192945466790"
+   },
+   "projects_id":{
+      "g-prj-kev-test-d-01":"g-prj-kev-test-d-01",
+      "g-prj-kev-test-d-02":"g-prj-kev-test-d-02"
+   }
+}
+```
+***
+## Commands to execute terraform
+To execute the code, it is necessary to have Terraform and Google Cloud SDK installed.
+Commands to execute it:
+- [1] gcloud auth login
+- [2] gcloud auth application-default login
+- [3] terraform init
+- [4] terraform plan -out=plan.out
+- [5] terraform apply plan.out
+***
+## Authors and acknowledgment
+This code was developed by Kevin Abregú and Marouene Djabbar.
+

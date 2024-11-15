@@ -1,0 +1,4 @@
+# Variables for monitoring module inputs
+monitoring_project_id = "g-prj-demolz0009-monitoring"
+monitored_projects_id = ["g-prj-demolz0009-cs-net-dev", "g-prj-demolz0009-cs-net-hub"]
+email_notification = "vanessa.gumangan@g.softwareone.com"

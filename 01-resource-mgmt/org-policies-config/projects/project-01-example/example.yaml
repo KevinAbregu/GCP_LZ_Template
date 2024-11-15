@@ -1,0 +1,7 @@
+iam.disableServiceAccountKeyCreation:
+  rules:
+  - enforce: true
+compute.vmExternalIpAccess:
+  rules:
+  - deny:
+      all: true

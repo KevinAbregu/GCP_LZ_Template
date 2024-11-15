@@ -1,0 +1,91 @@
+#################  Skip Default Network Creation  #################
+compute.skipDefaultNetworkCreation:
+  rules:
+  - enforce: true
+
+#################  Automatic IAM Grants for Default Service Accounts  #################
+constraints/iam.automaticIamGrantsForDefaultServiceAccounts:
+  rules:
+  - enforce: true
+
+#################  Location  #################
+gcp.resourceLocations:
+  rules:
+  - allow:
+      values:
+      - "in:eu-locations"
+
+# ######## Public IPs ##########
+compute.vmExternalIpAccess:
+  rules:
+  - deny:
+      all: true
+
+########## Storage Public Access Prevention ##########
+storage.publicAccessPrevention:
+  rules:
+  - enforce: true
+
+########## Enforce uniform bucket-level access ##########
+storage.uniformBucketLevelAccess:
+  rules:
+  - enforce: true
+
+########## Disable default service account key creation ##########
+iam.disableServiceAccountKeyCreation:
+  rules:
+  - enforce: true
+
+########## Disable default service account key upload ##########
+iam.disableServiceAccountKeyUpload:
+  rules:
+  - enforce: true
+
+########## Require OsLogin ##########
+constraints/compute.requireOsLogin:
+  rules:
+  - enforce: true
+
+########## Restrict SQL Public IP ##########
+constraints/sql.restrictPublicIp:
+  rules:
+  - enforce: true
+
+########## Restrict Dedicated Interconnect Usage ##########
+compute.restrictDedicatedInterconnectUsage:
+  rules:
+  - deny:
+      all: true
+
+########## Restrict Cloud NAT Usage  ##########
+compute.restrictCloudNATUsage:
+  rules:
+  - deny:
+      all: true  
+
+########## Restrict VPC Peering Usage  ##########
+compute.restrictVpcPeering:
+  rules:
+  - deny:
+      all: true  
+
+########## Restrict Shared VPC Host Projects  ##########
+compute.restrictSharedVpcHostProjects:
+  rules:
+  - deny:
+      all: true
+
+########## Restrict Load Balancer Types  ##########
+compute.restrictLoadBalancerCreationForTypes:
+  rules:
+  - allow:
+      values:
+      - "EXTERNAL_NETWORK_TCP_UDP"
+      - "EXTERNAL_TCP_PROXY"
+      - "EXTERNAL_SSL_PROXY"
+      - "EXTERNAL_HTTP_HTTPS"
+      - "EXTERNAL_MANAGED_HTTP_HTTPS"
+      - "REGIONAL_INTERNAL_MANAGED_TCP_PROXY"
+      - "REGIONAL_EXTERNAL_MANAGED_TCP_PROXY"
+      - "GLOBAL_EXTERNAL_MANAGED_HTTP_HTTPS"
+      - "INTERNAL_HTTP_HTTPS"
