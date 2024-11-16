@@ -95,7 +95,6 @@ variable "activate_apis" {
     "storage-api.googleapis.com",
     "monitoring.googleapis.com",
     "orgpolicy.googleapis.com",
-    "sourcerepo.googleapis.com",
     "cloudbuild.googleapis.com",
   ]
 }

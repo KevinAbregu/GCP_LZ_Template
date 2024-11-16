@@ -1,10 +1,10 @@
-org_id               = "731006146041"
-billing_account      = "01F12C-7B444B-EA778F"
-group_org_admins     = "gcp-organization-admins@dev.intelligencepartner.com"
-company_abbreviation = "demolz0001"
+org_id               = "993884056866"
+billing_account      = "010D46-DF0E74-6C5018"
+group_org_admins     = "admins-group@kevin-abregu.online"
+company_abbreviation = "kevinlz01"
 default_region = "europe-west1"
 force_destroy      = true
-grant_billing_user = false
+grant_billing_user = true
 
 #parent_folder = "folders/"
 #folder_id = ""
