@@ -6,22 +6,20 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket                      = "bkt-demo0001-bootstrap"
+    bucket                      = "bkt-kevinlz01-bootstrap"
     prefix                      = "terraform/resource-mgmt/state"
-    impersonate_service_account = "sa-demo0001-bootstrap@g-prj-demo0001-bootstrap.iam.gserviceaccount.com"
-
+    impersonate_service_account = "sa-kevinlz01-bootstrap@g-prj-kevinlz01-bootstrap.iam.gserviceaccount.com"
   }
 }
 
 provider "google" {
-  impersonate_service_account = "sa-demo0001-bootstrap@g-prj-demo0001-bootstrap.iam.gserviceaccount.com"
+  impersonate_service_account = "sa-kevinlz01-bootstrap@g-prj-kevinlz01-bootstrap.iam.gserviceaccount.com"
 }
 provider "google-beta" {
-  impersonate_service_account = "sa-demo0001-bootstrap@g-prj-demo0001-bootstrap.iam.gserviceaccount.com"
+  impersonate_service_account = "sa-kevinlz01-bootstrap@g-prj-kevinlz01-bootstrap.iam.gserviceaccount.com"
 }
 
 locals {
-  bootstrap_bucket            = "bkt-demo0001-bootstrap"
-  impersonate_service_account = "sa-demo0001-bootstrap@g-prj-demo0001-bootstrap.iam.gserviceaccount.com"
-
+  bootstrap_bucket            = "bkt-kevinlz01-bootstrap"
+  impersonate_service_account = "sa-kevinlz01-bootstrap@g-prj-kevinlz01-bootstrap.iam.gserviceaccount.com"
 }

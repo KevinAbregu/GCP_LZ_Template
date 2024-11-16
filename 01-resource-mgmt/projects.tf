@@ -19,14 +19,16 @@ locals {
   )]
 }
 module "project" {
-  source                  = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/project?ref=v28.0.0"
-  for_each                = { for i in local._projects : i.complete_name => i }
-  billing_account         = local.billing_account
-  name                    = each.value.complete_name
-  descriptive_name        = each.value.descriptive_name != null ? each.value.descriptive_name : each.value.complete_name
-  parent                  = each.value.parent_complete_name == "ROOT" ? var.parent_root : try(local.complete-folder[each.value.parent_complete_name], each.value.parent_complete_name)
-  services                = concat(each.value.services, local.default_services)
-  org_policies_data_path  = each.value.org_policies_data_path != null ? "org-policies-config/projects/${each.value.org_policies_data_path}/" : null
+  source           = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/project?ref=v35.0.0"
+  for_each         = { for i in local._projects : i.complete_name => i }
+  billing_account  = local.billing_account
+  name             = each.value.complete_name
+  descriptive_name = each.value.descriptive_name != null ? each.value.descriptive_name : each.value.complete_name
+  parent           = each.value.parent_complete_name == "ROOT" ? var.parent_root : try(local.complete-folder[each.value.parent_complete_name], each.value.parent_complete_name)
+  services         = concat(each.value.services, local.default_services)
+  factories_config = {
+    org_policies = each.value.org_policies_data_path != null ? "org-policies-config/projects/${each.value.org_policies_data_path}/" : null
+  }
   shared_vpc_host_config  = each.value.svpc_host == true ? { enabled = true } : null
   default_service_account = each.value.default_service_account
   labels                  = merge({ project = each.value.complete_name, resource-type = "project" }, each.value.labels)

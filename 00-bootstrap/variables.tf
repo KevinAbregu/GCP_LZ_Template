@@ -127,7 +127,8 @@ variable "sa_org_iam_permissions" {
     "roles/iam.denyAdmin",
     "roles/resourcemanager.projectCreator",
     "roles/accesscontextmanager.policyAdmin",
-    "roles/storage.admin"
+    "roles/storage.admin",
+    "roles/iam.organizationRoleAdmin"
   ]
 }
 

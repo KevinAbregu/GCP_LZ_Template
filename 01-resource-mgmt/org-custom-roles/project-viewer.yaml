@@ -1,0 +1,5 @@
+name: projectViewer
+includedPermissions:
+  - resourcemanager.projects.get
+  - resourcemanager.projects.getIamPolicy
+  - resourcemanager.projects.list

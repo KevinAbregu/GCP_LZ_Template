@@ -17,27 +17,39 @@ locals {
 
 
 module "folder-01" {
-  source                 = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/folder?ref=v28.0.0"
-  for_each               = { for v in local.level1 : "level1/${v.complete_name}" => v }
-  parent                 = var.parent_root
-  name                   = each.value.complete_name
-  org_policies_data_path = each.value.org_policies_data_path != null ? "org-policies-config/folders/${each.value.org_policies_data_path}/" : null
+  source   = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/folder?ref=v35.0.0"
+  for_each = { for v in local.level1 : "level1/${v.complete_name}" => v }
+  parent   = var.parent_root
+  name     = each.value.complete_name
+  factories_config = {
+    org_policies = each.value.org_policies_data_path != null ? "org-policies-config/folders/${each.value.org_policies_data_path}/" : null
+  }
+  tag_bindings = each.value.tag_bindings
+  depends_on = [ module.org ]
+
 }
 
 module "folder-02" {
-  source                 = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/folder?ref=v28.0.0"
-  for_each               = { for v in local.level2 : v.aux_tf_key != null ? "level2/${v.aux_tf_key}-${v.complete_name}" : "level2/${v.complete_name}" => v }
-  parent                 = module.folder-01["level1/${each.value.parent_complete_name}"].folder.id
-  name                   = each.value.complete_name
-  org_policies_data_path = each.value.org_policies_data_path != null ? "org-policies-config/folders/${each.value.org_policies_data_path}/" : null
+  source   = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/folder?ref=v35.0.0"
+  for_each = { for v in local.level2 : v.aux_tf_key != null ? "level2/${v.aux_tf_key}-${v.complete_name}" : "level2/${v.complete_name}" => v }
+  parent   = module.folder-01["level1/${each.value.parent_complete_name}"].folder.id
+  name     = each.value.complete_name
+  factories_config = {
+    org_policies = each.value.org_policies_data_path != null ? "org-policies-config/folders/${each.value.org_policies_data_path}/" : null
+  }
+  tag_bindings = each.value.tag_bindings 
+
 }
 
 module "folder-03" {
-  source                 = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/folder?ref=v28.0.0"
-  for_each               = { for v in local.level3 : v.aux_tf_key != null ? "level3/${v.aux_tf_key}-${v.complete_name}" : "level3/${v.complete_name}" => v }
-  parent                 = module.folder-02["level2/${each.value.parent_complete_name}"].folder.id
-  name                   = each.value.complete_name
-  org_policies_data_path = each.value.org_policies_data_path != null ? "org-policies-config/folders/${each.value.org_policies_data_path}/" : null
+  source   = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/folder?ref=v35.0.0"
+  for_each = { for v in local.level3 : v.aux_tf_key != null ? "level3/${v.aux_tf_key}-${v.complete_name}" : "level3/${v.complete_name}" => v }
+  parent   = module.folder-02["level2/${each.value.parent_complete_name}"].folder.id
+  name     = each.value.complete_name
+  factories_config = {
+    org_policies = each.value.org_policies_data_path != null ? "org-policies-config/folders/${each.value.org_policies_data_path}/" : null
+  }
+  tag_bindings = each.value.tag_bindings
 }
 
 locals {

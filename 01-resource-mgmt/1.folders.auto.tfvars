@@ -10,8 +10,8 @@ folders = {
   ],
   level2 = [
     {
-      name        = "cs-net",
-      parent_name = "cs"
+      name                   = "cs-net",
+      parent_name            = "cs"
       org_policies_data_path = "g-fldr-cs-net"
     },
     {

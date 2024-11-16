@@ -10,13 +10,15 @@ variable "fldr_prefix" {
 }
 variable "folders" {
   type = map(list(object(
-    { 
+    {
       name                   = optional(string, null) # (When complete_name is not specified). Completed with '[FLDR_PREFIX]-[NAME]'.
       complete_name          = optional(string, null) # Folder complete name.
       parent_complete_name   = optional(string, null) # Parent Folder Name.
       parent_name            = optional(string, null) # (When parent_complete_name is not specified). Completed with '[FLDR_PREFIX]-[NAME]'.
       org_policies_data_path = optional(string, null) # Indicates a folder path with organization policies in yaml files. Inside 'org-policies-config/folders/[PATH]'.
       aux_tf_key             = optional(string, null) # Variable used when there's a folder name coincidence to differenciate between them.
+      tag_bindings           = optional(map(string), {})
+
     }))
   )
   description = "Folders configuration "
@@ -50,6 +52,12 @@ variable "organization_policies" {
   type        = bool
   default     = false
   description = "Organization policies that  must be activated at org level. Its configuration is 'org-policies-config/organization/*.yaml'"
+}
+
+variable "custom_roles" {
+  type        = bool
+  default     = false
+  description = "Creation of custom roles. Its configuration is on 'org-custom-roles/*.yaml'"
 }
 
 variable "buckets" {

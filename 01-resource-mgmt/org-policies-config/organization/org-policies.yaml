@@ -1,0 +1,4 @@
+#################  Skip Default Network Creation  #################
+compute.skipDefaultNetworkCreation:
+  rules:
+  - enforce: true

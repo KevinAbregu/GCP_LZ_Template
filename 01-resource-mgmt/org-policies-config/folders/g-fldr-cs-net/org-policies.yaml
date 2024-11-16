@@ -1,0 +1,5 @@
+########## Allow Dedicated Interconnect Usage ##########
+compute.restrictDedicatedInterconnectUsage:
+  rules:
+  - allow:
+      all: true

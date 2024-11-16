@@ -13,7 +13,7 @@ locals {
 }
 
 module "service-account" {
-  source                 = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v28.0.0"
+  source                 = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v35.0.0"
   for_each               = { for i in local._service_accounts : "${i.parent_complete_name}@${i.complete_name}" => i }
   project_id             = each.value.parent_complete_name == "BOOTSTRAP" ? local.bootstrap_id : try(module.project[each.value.parent_complete_name].id, each.value.parent_complete_name)
   name                   = each.value.complete_name

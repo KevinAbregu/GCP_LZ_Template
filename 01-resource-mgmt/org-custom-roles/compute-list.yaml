@@ -1,0 +1,3 @@
+name: getInstancesList
+includedPermissions:
+  - compute.instances.list
