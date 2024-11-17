@@ -25,7 +25,7 @@ module "folder-01" {
     org_policies = each.value.org_policies_data_path != null ? "org-policies-config/folders/${each.value.org_policies_data_path}/" : null
   }
   tag_bindings = each.value.tag_bindings
-  depends_on = [ module.org ]
+  depends_on   = [module.org]
 
 }
 
@@ -37,7 +37,7 @@ module "folder-02" {
   factories_config = {
     org_policies = each.value.org_policies_data_path != null ? "org-policies-config/folders/${each.value.org_policies_data_path}/" : null
   }
-  tag_bindings = each.value.tag_bindings 
+  tag_bindings = each.value.tag_bindings
 
 }
 

@@ -1,6 +1,3 @@
-output "service-accounts" {
-  value = [for k, v in module.service-account : v.email]
-}
 
 output "buckets" {
   value = [for k, v in module.bucket : v.id]
@@ -12,4 +9,12 @@ output "projects" {
 
 output "folders" {
   value = local.complete-folder
+}
+
+output "fldr_prefix" {
+  value = var.fldr_prefix
+}
+
+output "parent_root" {
+  value = var.parent_root
 }

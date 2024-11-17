@@ -35,7 +35,7 @@ buckets = [
     force_destroy        = true
     versioning           = true
   },
-    {
+  {
     name                 = "monitoring"
     parent_complete_name = "BOOTSTRAP"
     force_destroy        = true
