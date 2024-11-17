@@ -12,12 +12,6 @@ buckets = [
     versioning           = true
   },
   {
-    name                 = "swo-essentials"
-    parent_complete_name = "BOOTSTRAP"
-    force_destroy        = true
-    versioning           = true
-  },
-  {
     name                 = "sp-pro"
     parent_complete_name = "BOOTSTRAP"
     force_destroy        = true

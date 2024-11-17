@@ -19,14 +19,16 @@ data "terraform_remote_state" "resource-mgmt" {
 }
 
 locals {
+  bootstrap_id         = data.terraform_remote_state.bootstrap.outputs.bootstrap.seed_project_id
   org_id               = "organizations/${data.terraform_remote_state.bootstrap.outputs.configuration_variables.org_id}"
-  company_abbreviation = data.terraform_remote_state.bootstrap.outputs.configuration_variables.company_abbreviation
-  project_prefix       = data.terraform_remote_state.bootstrap.outputs.configuration_variables.project_prefix
-  bucket_prefix        = data.terraform_remote_state.bootstrap.outputs.configuration_variables.bucket_prefix
-  sa_prefix            = data.terraform_remote_state.bootstrap.outputs.configuration_variables.sa_prefix
-  buckets = data.terraform_remote_state.bootstrap.outputs.buckets
-  folders = data.terraform_remote_state.bootstrap.outputs.folders
-  projects = data.terraform_remote_state.bootstrap.outputs.projects
-  fldr_prefix = data.terraform_remote_state.bootstrap.outputs.fldr_prefix
-  parent_root = data.terraform_remote_state.bootstrap.outputs.parent_root
+  company_abbreviation = try(data.terraform_remote_state.bootstrap.outputs.configuration_variables.company_abbreviation, null)
+  project_prefix       = try(data.terraform_remote_state.bootstrap.outputs.configuration_variables.project_prefix, "prj")
+  bucket_prefix        = try(data.terraform_remote_state.bootstrap.outputs.configuration_variables.bucket_prefix, "bkt")
+  sa_prefix            = try(data.terraform_remote_state.bootstrap.outputs.configuration_variables.sa_prefix, "sa")
+  fldr_prefix          = try(data.terraform_remote_state.resource-mgmt.outputs.fldr_prefix, "fldr")
+  buckets              = try(data.terraform_remote_state.resource-mgmt.outputs.buckets, {})
+  folders              = try(data.terraform_remote_state.resource-mgmt.outputs.folders, {})
+  projects             = try(data.terraform_remote_state.resource-mgmt.outputs.projects, {})
+  parent_root          = data.terraform_remote_state.resource-mgmt.outputs.parent_root
 }
+
