@@ -11,7 +11,7 @@ output "peering" {
 }
 
 output "iam_network_user" {
-  value = [for k, v in google_compute_subnetwork_iam_member.networkuser : { id: v.id }]
+  value = [for k, v in google_compute_subnetwork_iam_member.networkuser : { id : v.id }]
 }
 
 output "cloud_router" {
@@ -37,6 +37,6 @@ output "dns" {
 }
 
 output "address" {
-  value = [for k in tolist(module.address) : { "addresses" : k.addresses, "names" : k.names, "self_links" : k.self_links }]
+  value = [for k in module.address : { "addresses" : k.addresses, "names" : k.names, "self_links" : k.self_links }]
 }
 

@@ -1,5 +1,5 @@
-# ## Examples
-# address = [
+## Examples
+address = [
 #   {
 #     parent_name  = "cs-net-hub"
 #     address_type = "EXTERNAL"
@@ -9,11 +9,11 @@
 
 #   },
 #   # Use Examples
-#   # {
-#   #     parent_name = "cs-net-pro"
-#   #     subnet_name = "pro-principal"
-#   #     names = ["test01","test02", "cinco"]
-#   #     addresses = ["","", "10.0.2.5"]
-#   # },
+#   {
+#       parent_name = "cs-net-pro"
+#       subnet_name = "pro-principal"
+#       names = ["test01","test02", "cinco"]
+#       addresses = ["","", "10.0.2.5"]
+#   },
 
-# ]
+]

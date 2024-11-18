@@ -9,7 +9,7 @@ locals {
 }
 
 resource "google_compute_subnetwork_iam_member" "networkuser" {
-  for_each = {for i in local.iam_subnets: "${i.parent_complete_name}|${i.subnet_complete_name}|${i.member}"=> i}
+  for_each   = { for i in local.iam_subnets : "${i.parent_complete_name}|${i.subnet_complete_name}|${i.member}" => i }
   project    = each.value.parent_complete_name
   region     = each.value.region
   subnetwork = each.value.subnet_complete_name

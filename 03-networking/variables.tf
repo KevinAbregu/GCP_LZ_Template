@@ -155,6 +155,7 @@ variable "peerings" {
   description = "Peering between VPCs indicated."
 
 }
+
 variable "iam_subnets" {
   type = list(object({
     parent_name          = optional(string, null), # (When parent_complete_name is not specified) Completed with '[PROJECT_PREFIX]-[COMPANY_ABBREVIATION]-[PARENT_NAME]'.
@@ -167,6 +168,7 @@ variable "iam_subnets" {
   default     = []
   description = "Role of Compute Network User to the members indicated"
 }
+
 variable "routers" {
   type = list(object({
     parent_name           = optional(string, null), # (When parent_complete_name is not specified) Completed with '[PROJECT_PREFIX]-[COMPANY_ABBREVIATION]-[PARENT_NAME]'.
