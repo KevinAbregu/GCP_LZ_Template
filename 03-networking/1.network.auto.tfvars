@@ -86,74 +86,74 @@ networks = [
       },
     ]
   },
-  {
-    name        = "pre"
-    parent_name = "cs-net-pre"
-    subnets = [
-      {
-        subnet_name           = "pre-principal"
-        subnet_ip             = "10.0.4.0/24"
-        subnet_private_access = "true"
-      },
-      {
-        subnet_name = "pre-proxy-only"
-        subnet_ip   = "10.0.5.0/24"
-        purpose     = "REGIONAL_MANAGED_PROXY"
-        role        = "ACTIVE"
-        # ipv6_access_type = "INTERNAL" #
-      }
-    ]
-    ingress_rules = [
-      {
-        name          = "allow-ingress-http-ssh-icmp"
-        description   = "Allow SSH"
-        priority      = 1000
-        source_ranges = ["0.0.0.0/0"]
-        allow = [
-          {
-            protocol = "TCP",
-            ports    = ["22", "80", "8080"]
-          },
-          {
-            protocol = "ICMP"
-          }
-        ]
-      },
-    ]
-  },
-  {
-    name        = "dev"
-    parent_name = "cs-net-dev"
-    subnets = [
-      {
-        subnet_name           = "dev-principal"
-        subnet_ip             = "10.0.6.0/24"
-        subnet_private_access = "true"
-      },
-      {
-        subnet_name = "dev-proxy-only"
-        subnet_ip   = "10.0.7.0/24"
-        purpose     = "REGIONAL_MANAGED_PROXY"
-        role        = "ACTIVE"
-        # ipv6_access_type = "INTERNAL" #
-      }
-    ]
-    ingress_rules = [
-      {
-        name          = "allow-ingress-http-ssh-icmp"
-        description   = "Allow SSH"
-        priority      = 1000
-        source_ranges = ["0.0.0.0/0"]
-        allow = [
-          {
-            protocol = "TCP",
-            ports    = ["22", "80", "8080"]
-          },
-          {
-            protocol = "ICMP"
-          }
-        ]
-      },
-    ]
-  }
+  # {
+  #   name        = "pre"
+  #   parent_name = "cs-net-pre"
+  #   subnets = [
+  #     {
+  #       subnet_name           = "pre-principal"
+  #       subnet_ip             = "10.0.4.0/24"
+  #       subnet_private_access = "true"
+  #     },
+  #     {
+  #       subnet_name = "pre-proxy-only"
+  #       subnet_ip   = "10.0.5.0/24"
+  #       purpose     = "REGIONAL_MANAGED_PROXY"
+  #       role        = "ACTIVE"
+  #       ipv6_access_type = "INTERNAL" #
+  #     }
+  #   ]
+  #   ingress_rules = [
+  #     {
+  #       name          = "allow-ingress-http-ssh-icmp"
+  #       description   = "Allow SSH"
+  #       priority      = 1000
+  #       source_ranges = ["0.0.0.0/0"]
+  #       allow = [
+  #         {
+  #           protocol = "TCP",
+  #           ports    = ["22", "80", "8080"]
+  #         },
+  #         {
+  #           protocol = "ICMP"
+  #         }
+  #       ]
+  #     },
+  #   ]
+  # },
+  # {
+  #   name        = "dev"
+  #   parent_name = "cs-net-dev"
+  #   subnets = [
+  #     {
+  #       subnet_name           = "dev-principal"
+  #       subnet_ip             = "10.0.6.0/24"
+  #       subnet_private_access = "true"
+  #     },
+  #     {
+  #       subnet_name = "dev-proxy-only"
+  #       subnet_ip   = "10.0.7.0/24"
+  #       purpose     = "REGIONAL_MANAGED_PROXY"
+  #       role        = "ACTIVE"
+  #       ipv6_access_type = "INTERNAL" #
+  #     }
+  #   ]
+  #   ingress_rules = [
+  #     {
+  #       name          = "allow-ingress-http-ssh-icmp"
+  #       description   = "Allow SSH"
+  #       priority      = 1000
+  #       source_ranges = ["0.0.0.0/0"]
+  #       allow = [
+  #         {
+  #           protocol = "TCP",
+  #           ports    = ["22", "80", "8080"]
+  #         },
+  #         {
+  #           protocol = "ICMP"
+  #         }
+  #       ]
+  #     },
+  #   ]
+  # }
 ]

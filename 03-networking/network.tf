@@ -17,7 +17,7 @@ locals {
 
 module "network" {
   source                                 = "terraform-google-modules/network/google"
-  version                                = "~> 8.1"
+  version                                = "~> 9.3.0"
   for_each                               = { for i in local._networks : "${i.parent_complete_name}@${i.complete_name}" => i }
   project_id                             = each.value.parent_complete_name
   network_name                           = each.value.complete_name
