@@ -9,12 +9,11 @@ locals {
 }
 
 resource "google_compute_subnetwork_iam_member" "networkuser" {
-  count = length(local.iam_subnets)
-
-  project    = local.iam_subnets[count.index].parent_complete_name
-  region     = local.iam_subnets[count.index].region
-  subnetwork = local.iam_subnets[count.index].subnet_complete_name
+  for_each = {for i in local.iam_subnets: "${i.parent_complete_name}|${i.subnet_complete_name}|${i.member}"=> i}
+  project    = each.value.parent_complete_name
+  region     = each.value.region
+  subnetwork = each.value.subnet_complete_name
   role       = "roles/compute.networkUser"
-  member     = local.iam_subnets[count.index].member
+  member     = each.value.member
   depends_on = [module.network]
 }

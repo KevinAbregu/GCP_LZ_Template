@@ -11,7 +11,7 @@ output "peering" {
 }
 
 output "iam_network_user" {
-  value = [for k, v in google_compute_subnetwork_iam_member.networkuser : { member : v.member, subnetwork : v.subnetwork }]
+  value = [for k, v in google_compute_subnetwork_iam_member.networkuser : { id: v.id }]
 }
 
 output "cloud_router" {
