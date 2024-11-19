@@ -9,11 +9,9 @@ locals {
 
 
 module "instance_template" {
-  source  = "terraform-google-modules/vm/google//modules/instance_template"
-  version = "11.1.0"
-
-  for_each = { for i in local.instance_template : "${i.parent_complete_name}@${i.complete_name}" => i }
-
+  source                           = "terraform-google-modules/vm/google//modules/instance_template"
+  version                          = "12.1.0"
+  for_each                         = { for i in local.instance_template : "${i.parent_complete_name}@${i.complete_name}" => i }
   name_prefix                      = each.value.name_prefix
   project_id                       = each.value.parent_complete_name
   additional_disks                 = each.value.additional_disks

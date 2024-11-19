@@ -9,13 +9,13 @@ dns = [
         vpc     = "hub"
         project = "cs-net-hub"
       },
-    #   {
-    #     vpc              = "vpc-demolz0002-pre"
-    #     complete_project = "g-prj-demolz0002-cs-net-pre"
-    #   },
-    #   {
-    #     vpc = "projects/g-prj-demolz0002-cs-net-pro/global/networks/vpc-demolz0002-pro"
-    #   },
+      #   {
+      #     vpc              = "vpc-demolz0002-pre"
+      #     complete_project = "g-prj-demolz0002-cs-net-pre"
+      #   },
+      #   {
+      #     vpc = "projects/g-prj-demolz0002-cs-net-pro/global/networks/vpc-demolz0002-pro"
+      #   },
     ]
     recordsets = [
       {
