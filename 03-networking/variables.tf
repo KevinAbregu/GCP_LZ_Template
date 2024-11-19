@@ -362,16 +362,16 @@ variable "vpn" {
     parent_complete_name    = optional(string, null),      # Project ID
     name                    = optional(string, null),      # (When complete_name is not specified) Completed with '[VPN_PREFIX]-[COMPANY_ABBREVIATION]-[NAME]'.
     complete_name           = optional(string, null),      # VPN name
-    project_id              = optional(string, "")         # (Required) The ID of the project where this VPC will be created.
-    region                  = optional(string, "")         # (Required) The region in which you want to create the VPN gateway.
-    network                 = optional(string, "")         # (When network_complete_name is not specified) Completed with '[VPC_PREFIX]-[COMPANY_ABBREVIATION]-[NETWORK_NAME]'.
+    region                  = optional(string, null)       # (Required) The region in which you want to create the VPN gateway.
+    network_name            = optional(string, null)       # (When network_complete_name is not specified) Completed with '[VPC_PREFIX]-[COMPANY_ABBREVIATION]-[NETWORK_NAME]'.
     network_complete_name   = optional(string, null)       # The name of VPC being created.  
     peer_ips                = optional(list(string), [])   # (Required) IP address of remote-peer/gateway.
-    vpn_gw_ip               = optional(string)             # (Optional) Please enter the public IP address of the VPN Gateway, if you have already one. Do not set this variable to autocreate one
-    cr_name                 = optional(string)             # (optional) The name of cloud router for BGP routing
+    vpn_gw_ip               = optional(string, "")         # (Optional) Please enter the public IP address of the VPN Gateway, if you have already one. Do not set this variable to autocreate one
+    router_name             = optional(string, null),      # (When router_complete_name is not specified) Completed with '[ROUTER_PREFIX]-[COMPANY_ABBREVIATION]-[ROUTER_NAME]'.
+    router_complete_name    = optional(string, null),      # Router name    
     tunnel_name_prefix      = optional(string)             # (optional) The optional custom name of VPN tunnel being created
     remote_traffic_selector = optional(list(string), null) # (optional) Remote traffic selector to use when establishing the VPN tunnel with peer VPN gateway.Value should be list of CIDR formatted strings and ranges should be disjoint.
-    local_traffic_selector  = optional(list(string), null) #(otpional) Local traffic selector to use when establishing the VPN tunnel with peer VPN gateway. Value should be list of CIDR formatted strings and ranges should be disjoint.
+    local_traffic_selector  = optional(list(string), null) # (optional) Local traffic selector to use when establishing the VPN tunnel with peer VPN gateway. Value should be list of CIDR formatted strings and ranges should be disjoint.
     shared_secret           = optional(string, null)       # (optional) Please enter the shared secret/pre-shared key
     route_priority          = optional(number, 100)        # (optional) Route priority number
   }))

@@ -11,7 +11,7 @@ locals {
 module "cloud-nat" {
   source                              = "terraform-google-modules/cloud-nat/google"
   version                             = "~> 5.3"
-  for_each                            = {for i in local._nats: "${i.parent_complete_name}@${i.complete_name}" => i}
+  for_each                            = { for i in local._nats : "${i.parent_complete_name}@${i.complete_name}" => i }
   project_id                          = each.value.parent_complete_name
   name                                = each.value.complete_name
   region                              = each.value.region
