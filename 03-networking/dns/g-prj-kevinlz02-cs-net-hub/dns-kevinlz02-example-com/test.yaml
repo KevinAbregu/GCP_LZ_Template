@@ -1,0 +1,20 @@
+test:
+  name: "test"
+  type: "A"
+  ttl: 300
+  records: ["8.8.8.8"] 
+test2:
+  name: "test2"
+  type: "A"
+  ttl: 300
+  records: ["8.8.8.8"] 
+test3:
+  name: "test3"
+  type: "A"
+  ttl: 300
+  records: ["8.8.8.8"]
+test4:
+  name: "test4"
+  type: "A"
+  ttl: 300
+  records: ["8.8.8.8"] 
