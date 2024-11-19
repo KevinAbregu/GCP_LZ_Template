@@ -11,7 +11,6 @@ locals {
 module "mig" {
   source  = "terraform-google-modules/vm/google//modules/mig"
   version = "11.1.0"
-
   for_each                         = { for i in local.mig : "${i.parent_complete_name}@${i.complete_name}" => i }
   autoscaler_name                  = each.value.autoscaler_name
   autoscaling_cpu                  = each.value.autoscaling_cpu
