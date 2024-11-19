@@ -2,7 +2,7 @@ locals {
   vpn = [for i in var.vpn : merge(i,
     {
       parent_complete_name  = i.parent_complete_name != null ? i.parent_complete_name : "${local.project_prefix}-${local.company_abbreviation}-${i.parent_name}"
-      router_complete_name  = i.router_complete_name != null ? i.router_complete_name : i.router_name != null ? "${var.router_prefix}-${local.company_abbreviation}-${i.router_name}": null
+      router_complete_name  = i.router_complete_name != null ? i.router_complete_name : i.router_name != null ? "${var.router_prefix}-${local.company_abbreviation}-${i.router_name}" : null
       network_complete_name = i.network_complete_name != null ? i.network_complete_name : "${var.vpc_prefix}-${local.company_abbreviation}-${i.network_name}"
       complete_name         = i.complete_name != null ? i.complete_name : "${var.vpn_prefix}-${local.company_abbreviation}-${i.name}"
       region                = i.region != null ? i.region : local.default_region

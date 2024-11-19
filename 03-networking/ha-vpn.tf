@@ -12,22 +12,22 @@ locals {
 
 module "ha_vpn" {
   source                           = "terraform-google-modules/vpn/google//modules/vpn_ha"
-  version                          = "~> 4.0"
-  count                            = length(local.ha_vpn)
-  peer_external_gateway            = local.ha_vpn[count.index].peer_external_gateway
-  peer_gcp_gateway                 = local.ha_vpn[count.index].peer_gcp_gateway
-  name                             = local.ha_vpn[count.index].complete_name
-  stack_type                       = local.ha_vpn[count.index].stack_type
-  network                          = try(module.network["${local.ha_vpn[count.index].parent_complete_name}@${local.ha_vpn[count.index].network_complete_name}"].network_id, local.ha_vpn[count.index].network_complete_name)
-  project_id                       = local.ha_vpn[count.index].parent_complete_name
-  region                           = local.ha_vpn[count.index].region
-  route_priority                   = local.ha_vpn[count.index].route_priority
-  keepalive_interval               = local.ha_vpn[count.index].keepalive_interval
-  router_name                      = local.ha_vpn[count.index].router_complete_name
-  tunnels                          = local.ha_vpn[count.index].tunnels
-  vpn_gateway_self_link            = local.ha_vpn[count.index].vpn_gateway_self_link
-  create_vpn_gateway               = local.ha_vpn[count.index].create_vpn_gateway
-  labels                           = local.ha_vpn[count.index].labels
-  external_vpn_gateway_description = local.ha_vpn[count.index].external_vpn_gateway_description
+  version                          = "~> 4.2"
+  for_each                         = { for i in local.ha_vpn : "${i.parent_complete_name}@${i.complete_name}" => i }
+  peer_external_gateway            = each.value.peer_external_gateway
+  peer_gcp_gateway                 = each.value.peer_gcp_gateway
+  name                             = each.value.complete_name
+  stack_type                       = each.value.stack_type
+  network                          = try(module.network["${each.value.parent_complete_name}@${each.value.network_complete_name}"].network_id, each.value.network_complete_name)
+  project_id                       = each.value.parent_complete_name
+  region                           = each.value.region
+  route_priority                   = each.value.route_priority
+  keepalive_interval               = each.value.keepalive_interval
+  router_name                      = each.value.router_complete_name
+  tunnels                          = each.value.tunnels
+  vpn_gateway_self_link            = each.value.vpn_gateway_self_link
+  create_vpn_gateway               = each.value.create_vpn_gateway
+  labels                           = each.value.labels
+  external_vpn_gateway_description = each.value.external_vpn_gateway_description
   depends_on                       = [module.cloud_router]
 }
