@@ -11,7 +11,7 @@ locals {
 
 module "cloud_router" {
   source      = "terraform-google-modules/cloud-router/google"
-  version     = "~> 6.0"
+  version     = "~> 6.2"
   for_each    = { for i in local.routers : "${i.parent_complete_name}@${i.complete_name}" => i }
   name        = each.value.complete_name
   project     = each.value.parent_complete_name
